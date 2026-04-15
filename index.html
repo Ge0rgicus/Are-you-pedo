@@ -1,24 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Age Detector</title>
-  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-
-  <script defer src="script.js"></script>
-
-  <style>
-    body { font-family: Arial; text-align: center; margin-top: 40px; }
-    #preview { max-width: 300px; margin-top: 20px; }
-  </style>
+  <meta charset="UTF-8" />
+  <title>Age Detection – face-api.js</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Age Detection</h1>
 
-  <input type="file" id="upload" accept="image/*">
-  <br>
-  <img id="preview" />
+  <h2>Upload an Image for Age Detection</h2>
+  <input type="file" id="fileInput" accept="image/*" />
 
-  <h2 id="result"></h2>
+  <div id="container">
+    <img id="preview" />
+    <canvas id="overlay"></canvas>
+  </div>
+
+  <script src="https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
