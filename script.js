@@ -4,6 +4,7 @@ const fileInput = document.getElementById("fileInput");
 
 async function loadModels() {
   await faceapi.nets.ssdMobilenetv1.loadFromUri("models");
+  await faceapi.nets.faceLandmark68Net.loadFromUri("models");
   await faceapi.nets.ageGenderNet.loadFromUri("models");
 }
 
@@ -24,6 +25,7 @@ fileInput.addEventListener("change", async () => {
 
     const detections = await faceapi
       .detectAllFaces(img, options)
+      .withFaceLandmarks()
       .withAgeAndGender();
 
     const ctx = canvas.getContext("2d");
