@@ -3,20 +3,21 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AgeScope</title>
+  <title>AreYouPedo?</title>
   <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #f0ede8;
-      --ink: #1a1814;
-      --mid: #8a8478;
-      --accent: #d4522a;
-      --surface: #e8e4de;
-      --border: #c8c3bb;
-      --radius: 2px;
+      --bg: #eef4ff;
+      --ink: #0f172a;
+      --mid: #64748b;
+      --accent: #3b82f6;   /* blue */
+      --accent-soft: #93c5fd;
+      --surface: #e0ecff;
+      --border: #c7d7f5;
+      --radius: 4px;
     }
 
     body {
@@ -30,7 +31,6 @@
       align-items: center;
     }
 
-    /* Grain overlay */
     body::before {
       content: '';
       position: fixed;
@@ -41,12 +41,8 @@
       opacity: 0.5;
     }
 
-    .wrapper {
-      width: 100%;
-      max-width: 720px;
-    }
+    .wrapper { width: 100%; max-width: 720px; }
 
-    /* ── Header ── */
     header {
       display: flex;
       align-items: flex-end;
@@ -75,7 +71,6 @@
       padding-bottom: 4px;
     }
 
-    /* ── Status bar ── */
     #status-bar {
       background: var(--ink);
       color: var(--bg);
@@ -103,7 +98,6 @@
 
     @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
 
-    /* ── Drop zone ── */
     .drop-zone {
       border: 2px dashed var(--border);
       border-radius: var(--radius);
@@ -130,24 +124,10 @@
       height: 100%;
     }
 
-    .drop-icon {
-      font-size: 48px;
-      line-height: 1;
-      margin-bottom: 16px;
-      display: block;
-      color: var(--mid);
-    }
-
-    .drop-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
+    .drop-icon { font-size: 48px; line-height: 1; margin-bottom: 16px; display: block; color: var(--mid); }
+    .drop-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
     .drop-sub { font-size: 11px; color: var(--mid); letter-spacing: 0.1em; }
 
-    /* ── Canvas wrapper ── */
     #canvas-wrap {
       display: none;
       position: relative;
@@ -159,20 +139,10 @@
     }
 
     #canvas-wrap canvas,
-    #canvas-wrap img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
+    #canvas-wrap img { display: block; width: 100%; height: auto; }
 
-    /* overlay canvas sits on top */
-    #overlay {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-    }
+    #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-    /* ── Buttons ── */
     .btn-row { display: flex; gap: 12px; margin-bottom: 24px; }
 
     .btn {
@@ -192,11 +162,144 @@
 
     .btn-primary { background: var(--ink); color: var(--bg); flex: 1; }
     .btn-primary:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
-
     .btn-ghost { background: transparent; color: var(--ink); }
     .btn-ghost:hover:not(:disabled) { background: var(--surface); }
 
-    /* ── Results ── */
+    /* ── Number input section ── */
+    .calc-section {
+      display: none;
+      margin-bottom: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .calc-section.visible { display: block; }
+
+    .calc-label {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 12px;
+    }
+
+    .calc-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .calc-formula {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ink);
+      flex-wrap: wrap;
+    }
+
+    .calc-formula .detected-age {
+      background: var(--ink);
+      color: var(--bg);
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      font-size: 16px;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .drop-zone.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+
+    .calc-formula .op {
+      color: var(--accent);
+      font-size: 22px;
+    }
+
+    .calc-formula input[type="number"] {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      width: 80px;
+      padding: 6px 12px;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--ink);
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .calc-formula input[type="number"]:focus { border-color: var(--accent); }
+    .calc-formula input[type="number"]::-webkit-inner-spin-button,
+    .calc-formula input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
+
+    .calc-result-wrap {
+      margin-top: 16px;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .calc-result-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+    }
+
+    .calc-result-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      transition: all 0.3s ease;
+    }
+
+    .calc-result-unit {
+      font-size: 13px;
+      color: var(--mid);
+      letter-spacing: 0.1em;
+    }
+
+    /* Multi-face selector */
+    .face-selector {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .face-selector label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+    }
+
+    .face-selector select {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      padding: 6px 10px;
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--ink);
+      outline: none;
+      cursor: pointer;
+    }
+
     #results { display: none; }
 
     .results-label {
@@ -221,77 +324,29 @@
       border-radius: var(--radius);
       padding: 20px;
       animation: fadeUp 0.4s ease both;
+      cursor: pointer;
+      transition: border-color 0.2s;
     }
+
+    .face-card:hover { border-color: var(--accent); }
+    .face-card.selected { border-color: var(--accent); border-width: 2px; }
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .face-card-num {
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      color: var(--mid);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
+    .face-card-num { font-size: 10px; letter-spacing: 0.2em; color: var(--mid); text-transform: uppercase; margin-bottom: 8px; }
+    .face-card-age { font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; line-height: 1; color: var(--ink); }
+    .face-card-unit { font-size: 12px; color: var(--mid); margin-top: 2px; letter-spacing: 0.1em; }
+    .face-card-gender { margin-top: 12px; font-size: 11px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.15em; }
 
-    .face-card-age {
-      font-family: 'Syne', sans-serif;
-      font-size: 52px;
-      font-weight: 800;
-      line-height: 1;
-      color: var(--ink);
-    }
+    .age-bar { margin-top: 14px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .age-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.9s cubic-bezier(0.16,1,0.3,1); }
 
-    .face-card-unit {
-      font-size: 12px;
-      color: var(--mid);
-      margin-top: 2px;
-      letter-spacing: 0.1em;
-    }
+    .no-faces { padding: 32px; text-align: center; color: var(--mid); font-size: 13px; border: 1px dashed var(--border); border-radius: var(--radius); }
 
-    .face-card-gender {
-      margin-top: 12px;
-      font-size: 11px;
-      color: var(--mid);
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-    }
-
-    .age-bar {
-      margin-top: 14px;
-      height: 3px;
-      background: var(--border);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .age-bar-fill {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 2px;
-      transition: width 0.9s cubic-bezier(0.16,1,0.3,1);
-    }
-
-    /* ── No faces ── */
-    .no-faces {
-      padding: 32px;
-      text-align: center;
-      color: var(--mid);
-      font-size: 13px;
-      border: 1px dashed var(--border);
-      border-radius: var(--radius);
-    }
-
-    footer {
-      margin-top: 64px;
-      font-size: 10px;
-      color: var(--mid);
-      letter-spacing: 0.15em;
-      text-align: center;
-    }
-
+    footer { margin-top: 64px; font-size: 10px; color: var(--mid); letter-spacing: 0.15em; text-align: center; }
     footer strong { color: var(--ink); }
   </style>
 </head>
@@ -299,8 +354,7 @@
 <div class="wrapper">
 
   <header>
-    <div class="logo">Age<span>Scope</span></div>
-    <div class="header-meta">Runs 100% in your browser</div>
+    <div class="logo">AreU<span>Pedo</span></div>by DumbleGeorge
   </header>
 
   <div id="status-bar">
@@ -309,26 +363,54 @@
   </div>
 
   <div class="drop-zone" id="drop-zone">
-    <input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])"/>
+    <input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])" disabled/>
     <span class="drop-icon">⬡</span>
     <div class="drop-title">Drop a photo here</div>
     <div class="drop-sub">JPG · PNG · WEBP — no upload, fully private</div>
   </div>
 
   <div id="canvas-wrap">
-    <img id="img-el" alt=""/>
+    <img id="img-el" alt="" onclick="document.getElementById('file-input').click()" style="cursor:pointer"/>
     <canvas id="overlay"></canvas>
   </div>
 
   <div class="btn-row">
     <button class="btn btn-primary" id="detect-btn" onclick="runDetect()" disabled>Detect Ages</button>
     <button class="btn btn-ghost" onclick="resetAll()">Clear</button>
+    <button class="btn btn-ghost" onclick="triggerUpload()">Reupload</button>
   </div>
 
   <div id="results"></div>
 
+  <!-- Calculator section, shown after detection -->
+  <div class="calc-section" id="calc-section">
+    <div class="calc-label">Age Calculator</div>
+
+    <div class="face-selector" id="face-selector-wrap" style="display:none">
+      <label>Using face:</label>
+      <select id="face-select" onchange="updateCalc()"></select>
+    </div>
+
+    <div class="calc-row">
+      <div class="calc-formula">
+        <span class="op"></span>
+        <span class="detected-age" id="calc-detected">—</span>
+        <span class="op">+</span>
+        <input type="number" id="calc-input" min="0" max="999" placeholder="0" oninput="updateCalc()"/>
+        <span class="op"></span>
+        <span class="op"></span>
+      </div>
+    </div>
+
+    <div class="calc-result-wrap">
+      <span class="calc-result-label">Result:</span>
+      <span class="calc-result-value" id="calc-result">—</span>
+      <span class="calc-result-unit" id="calc-result-unit"></span>
+    </div>
+  </div>
+
   <footer>
-    <strong>AgeScope</strong> — powered by face-api.js · all processing happens locally · no data leaves your device
+    <strong>AreUPedo</strong> - Done by DumbleGeorge. If you wish to support me go to <a href="https://buymeacoffee.com/dumblegeorge"> Buy Me Coffee</a>
   </footer>
 </div>
 
@@ -336,8 +418,8 @@
   const MODEL_URL = './models';
   let modelsReady = false;
   let currentImage = null;
+  let detectedFaces = [];
 
-  // ── Load models ──────────────────────────────────────────────────
   async function loadModels() {
     setStatus('loading', 'Loading AI models…');
     try {
@@ -351,25 +433,31 @@
       setStatus('error', 'Failed to load models. See README for setup.');
       console.error(e);
     }
+    modelsReady = true;
+    document.getElementById('file-input').disabled = false;
+    setStatus('ready', 'Models ready — drop a photo');
   }
 
   window.addEventListener('load', () => {
     if (typeof faceapi !== 'undefined') {
       loadModels();
     } else {
-      // faceapi loads async, wait for it
       const interval = setInterval(() => {
-        if (typeof faceapi !== 'undefined') {
-          clearInterval(interval);
-          loadModels();
-        }
+        if (typeof faceapi !== 'undefined') { clearInterval(interval); loadModels(); }
       }, 100);
     }
   });
 
-  // ── Drag & drop ──────────────────────────────────────────────────
   const dropZone = document.getElementById('drop-zone');
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+
+    if (!modelsReady) return; // 🚫 block early
+
+    dropZone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f?.type.startsWith('image/')) handleFile(f);
+  });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
   dropZone.addEventListener('drop', e => {
     e.preventDefault();
@@ -386,11 +474,11 @@
       img.src = currentImage;
       img.onload = () => {
         document.getElementById('canvas-wrap').style.display = 'block';
-        dropZone.style.display = 'none';
+        dropZone.style.display = '0.3';
         document.getElementById('detect-btn').disabled = !modelsReady;
         document.getElementById('results').style.display = 'none';
         document.getElementById('results').innerHTML = '';
-        // Clear overlay
+        document.getElementById('calc-section').classList.remove('visible');
         const cv = document.getElementById('overlay');
         cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
       };
@@ -398,10 +486,8 @@
     reader.readAsDataURL(file);
   }
 
-  // ── Run detection ────────────────────────────────────────────────
   async function runDetect() {
     if (!modelsReady || !currentImage) return;
-
     const btn = document.getElementById('detect-btn');
     btn.disabled = true;
     btn.textContent = 'Analyzing…';
@@ -409,66 +495,55 @@
 
     try {
       const imgEl = document.getElementById('img-el');
-
       const detections = await faceapi
         .detectAllFaces(imgEl, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
         .withAgeAndGender();
 
+      detectedFaces = detections;
       drawOverlay(imgEl, detections);
       renderResults(detections);
+      setupCalc(detections);
       setStatus('ready', `Found ${detections.length} face${detections.length !== 1 ? 's' : ''}`);
     } catch (err) {
       setStatus('error', 'Detection failed: ' + err.message);
-      console.error(err);
     } finally {
       btn.disabled = false;
       btn.textContent = 'Detect Ages';
     }
   }
 
-  // ── Draw boxes on canvas overlay ─────────────────────────────────
   function drawOverlay(imgEl, detections) {
     const cv = document.getElementById('overlay');
     const displayW = imgEl.clientWidth;
     const displayH = imgEl.clientHeight;
     cv.width  = displayW;
     cv.height = displayH;
-
     const scaleX = displayW / imgEl.naturalWidth;
     const scaleY = displayH / imgEl.naturalHeight;
-
     const ctx = cv.getContext('2d');
     ctx.clearRect(0, 0, displayW, displayH);
 
     detections.forEach((d, i) => {
       const box = d.detection.box;
-      const x = box.x * scaleX;
-      const y = box.y * scaleY;
-      const w = box.width  * scaleX;
-      const h = box.height * scaleY;
-
-      // Box
+      const x = box.x * scaleX, y = box.y * scaleY;
+      const w = box.width * scaleX, h = box.height * scaleY;
       ctx.strokeStyle = '#d4522a';
       ctx.lineWidth = 2;
       ctx.strokeRect(x, y, w, h);
-
-      // Label pill
       const label = `#${i+1}  ${Math.round(d.age)} yrs`;
       ctx.font = 'bold 12px "Space Mono", monospace';
       const tw = ctx.measureText(label).width;
-      const px = 10, py = 6;
-
       ctx.fillStyle = '#d4522a';
-      ctx.beginPath();
-      ctx.rect(x, y - 30, tw + px * 2, 26);
-      ctx.fill();
-
+      ctx.fillRect(x, y - 30, tw + 20, 26);
       ctx.fillStyle = '#fff';
-      ctx.fillText(label, x + px, y - 10);
+      ctx.fillText(label, x + 10, y - 10);
     });
   }
 
-  // ── Render result cards ──────────────────────────────────────────
+  function triggerUpload() {
+    document.getElementById('file-input').click();
+  }
+
   function renderResults(detections) {
     const el = document.getElementById('results');
     el.style.display = 'block';
@@ -481,26 +556,20 @@
     const cards = detections.map((d, i) => {
       const age = Math.round(d.age);
       const gender = d.gender.charAt(0).toUpperCase() + d.gender.slice(1);
-      const barW = Math.min(100, age);
       return `
-        <div class="face-card" style="animation-delay:${i * 70}ms">
+        <div class="face-card" id="card-${i}" style="animation-delay:${i*70}ms" onclick="selectFace(${i})">
           <div class="face-card-num">Face #${i + 1}</div>
           <div class="face-card-age">${age}</div>
           <div class="face-card-unit">years old</div>
           <div class="face-card-gender">${gender}</div>
-          <div class="age-bar">
-            <div class="age-bar-fill" id="bar-${i}" style="width:0%"></div>
-          </div>
-        </div>
-      `;
+          <div class="age-bar"><div class="age-bar-fill" id="bar-${i}" style="width:0%"></div></div>
+        </div>`;
     }).join('');
 
     el.innerHTML = `
       <div class="results-label">${detections.length} face${detections.length !== 1 ? 's' : ''} detected</div>
-      <div class="face-grid">${cards}</div>
-    `;
+      <div class="face-grid">${cards}</div>`;
 
-    // Animate bars after paint
     requestAnimationFrame(() => {
       detections.forEach((d, i) => {
         setTimeout(() => {
@@ -511,15 +580,86 @@
     });
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────
+  function setupCalc(detections) {
+    if (!detections.length) return;
+
+    const calcSection = document.getElementById('calc-section');
+    calcSection.classList.add('visible');
+
+    const selectorWrap = document.getElementById('face-selector-wrap');
+    const faceSelect = document.getElementById('face-select');
+
+    if (detections.length > 1) {
+      selectorWrap.style.display = 'flex';
+      faceSelect.innerHTML = detections.map((d, i) =>
+        `<option value="${i}">Face #${i+1} (${Math.round(d.age)} yrs)</option>`
+      ).join('');
+    } else {
+      selectorWrap.style.display = 'none';
+    }
+
+    // Select first face card
+    selectFace(0);
+    updateCalc();
+  }
+
+  function selectFace(index) {
+    // Highlight selected card
+    document.querySelectorAll('.face-card').forEach(c => c.classList.remove('selected'));
+    const card = document.getElementById(`card-${index}`);
+    if (card) card.classList.add('selected');
+
+    // Sync dropdown
+    const sel = document.getElementById('face-select');
+    sel.value = index;
+
+    updateCalc();
+  }
+
   function setStatus(state, text) {
     const dot = document.getElementById('dot');
     dot.className = 'status-dot ' + state;
     document.getElementById('status-text').textContent = text;
+
+    const dz = document.getElementById('drop-zone');
+    if (state !== 'ready') {
+      dz.classList.add('disabled');
+    } else {
+      dz.classList.remove('disabled');
+    }
+  }
+
+  function updateCalc() {
+    const index = parseInt(document.getElementById('face-select').value) || 0;
+    const face = detectedFaces[index];
+    if (!face) return;
+
+    const detectedAge = Math.round(face.age);
+    document.getElementById('calc-detected').textContent = detectedAge;
+
+    const inputVal = parseFloat(document.getElementById('calc-input').value);
+    const resultEl = document.getElementById('calc-result');
+    const unitEl = document.getElementById('calc-result-unit');
+
+    if (!isNaN(inputVal)) {
+      const result = ((detectedAge + inputVal) / 2 - 7) * 2;
+      resultEl.style.transform = "scale(1.1)";
+      setTimeout(() => resultEl.style.transform = "scale(1)", 150);
+      if (result <0){
+        result = 0;
+      }
+
+      resultEl.textContent = Number.isInteger(result) ? result : result.toFixed(1);
+      unitEl.textContent = 'avg';
+    } else {
+      resultEl.textContent = '—';
+      unitEl.textContent = '';
+    }
   }
 
   function resetAll() {
     currentImage = null;
+    detectedFaces = [];
     document.getElementById('file-input').value = '';
     document.getElementById('img-el').src = '';
     document.getElementById('canvas-wrap').style.display = 'none';
@@ -527,6 +667,9 @@
     document.getElementById('detect-btn').disabled = !modelsReady;
     document.getElementById('results').style.display = 'none';
     document.getElementById('results').innerHTML = '';
+    document.getElementById('calc-section').classList.remove('visible');
+    document.getElementById('calc-input').value = '';
+    document.getElementById('calc-result').textContent = '—';
     if (modelsReady) setStatus('ready', 'Models ready — drop a photo');
   }
 </script>
