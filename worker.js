@@ -20,7 +20,7 @@ export default {
       form.append("image_file", photo);
       form.append("return_attributes", "age,gender");
 
-      const res = await fetch("https://api-us.faceplusplus.com/facepp/v3/detect", {
+      const res = await fetch("https://api-cn.faceplusplus.com/facepp/v3/detect", {
         method: "POST",
         body: form
       });
