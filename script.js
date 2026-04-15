@@ -3,9 +3,8 @@ const canvas = document.getElementById("overlay");
 const fileInput = document.getElementById("fileInput");
 
 async function loadModels() {
-  const MODEL_URL = "https://justadudewhohacks.github.io/face-api.js/models";
-  await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-  await faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL);
+  await faceapi.nets.ssdMobilenetv1.loadFromUri("models");
+  await faceapi.nets.ageGenderNet.loadFromUri("models");
 }
 
 loadModels();
@@ -21,10 +20,7 @@ fileInput.addEventListener("change", async () => {
     canvas.height = img.height;
     img.style.display = "block";
 
-    const options = new faceapi.TinyFaceDetectorOptions({
-      inputSize: 256,
-      scoreThreshold: 0.5
-    });
+    const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 });
 
     const detections = await faceapi
       .detectAllFaces(img, options)
