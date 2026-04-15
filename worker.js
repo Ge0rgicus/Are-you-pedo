@@ -11,26 +11,21 @@ export default {
     }
 
     try {
-      const body = await request.formData();
+      const incoming = await request.formData();
+      const photo = incoming.get("photo");
 
-      const res = await fetch("https://api.luxand.cloud/photo/detect", {
+      const form = new FormData();
+      form.append("api_key", "KRPLmliHXPWoMRB4ZhoRe6DJg5ymyirh");
+      form.append("api_secret", "5Ttt7-DciSEyZ89lrU9Z61Ssn68XPAoC");
+      form.append("image_file", photo);
+      form.append("return_attributes", "age,gender");
+
+      const res = await fetch("https://api-us.faceplusplus.com/facepp/v3/detect", {
         method: "POST",
-        headers: { token: "f763ae5df7c6453da7e27b2ded7713ba" },
-        body
+        body: form
       });
 
       const text = await res.text();
-
-      if (!text || text.trim() === "") {
-        return new Response(JSON.stringify({ error: "Empty response from Luxand API" }), {
-          status: 500,
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-          }
-        });
-      }
-
       return new Response(text, {
         status: res.status,
         headers: {
@@ -38,7 +33,6 @@ export default {
           "Access-Control-Allow-Origin": "*",
         }
       });
-
     } catch (err) {
       return new Response(JSON.stringify({ error: err.message }), {
         status: 500,
